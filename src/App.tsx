@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import CountryDetails from './components/CountryDetails';
 import SearchAndFilter from './components/SearchAndFilter';
+import { SortAsc } from 'lucide-react';
 
 function App() {
   const [countries, setCountries] = useState<Country[]>([]);
@@ -76,7 +77,7 @@ function App() {
       if (afghanistan) {
         setSelectedCountry(afghanistan);
       } else {
-        throw new Error('Default country (Afghanistan) not found in the data');
+        throw new Error('Default country not found in the data');
       }
 
       setError('');
@@ -124,7 +125,6 @@ function App() {
       scrollToTop();
     }
   };
-
   const regions = Array.from(
     new Set(
       countries
@@ -140,8 +140,14 @@ function App() {
     const matchesRegion = !selectedRegion || country.region === selectedRegion;
     return matchesSearch && matchesRegion;
   });
+  const [sortAscending, setSortAscending] = useState(false);
+
+  const sortedCountries = [...filteredCountries].sort((a, b) =>
+    sortAscending ? a.area - b.area : b.area - a.area
+  );
 
   if (loading) {
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -184,50 +190,60 @@ function App() {
           regions={regions}
         />
 
-        {filteredCountries.length > 0 ? (
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left side - Country Details */}
-            <div className="lg:w-1/2 xl:w-2/5">
-              {selectedCountry && (
-                <div className="sticky top-8">
-                  <CountryDetails
-                    country={selectedCountry}
-                    onBorderClick={handleBorderClick}
-                  />
-                </div>
-              )}
-            </div>
-            
-            {/* Right side - Country Grid */}
-            <div className="lg:w-1/2 xl:w-3/5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filteredCountries.map((country) => (
-                  <button
-                    key={country.cca3}
-                    onClick={() => handleCountrySelect(country)}
-                    className={`p-4 rounded-lg shadow-md transition-all ${
-                      selectedCountry?.cca3 === country.cca3
-                        ? 'bg-indigo-100 border-2 border-indigo-500'
-                        : 'bg-white hover:shadow-lg'
-                    }`}
-                  >
-                    <img
-                      src={country.flags.png}
-                      alt={`Flag of ${country.name.common}`}
-                      className="w-full h-32 object-cover rounded-md mb-4"
-                    />
-                    <h3 className="font-semibold text-gray-800">{country.name.common}</h3>
-                    <p className="text-sm text-gray-600">{country.region}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center text-gray-600">
-            No countries found matching your criteria
-          </div>
-        )}
+{filteredCountries.length > 0 ? (
+  <div className="flex flex-col lg:flex-row gap-8">
+    {}
+    <div className="lg:w-1/2 xl:w-2/5">
+      {selectedCountry && (
+        <div className="sticky top-8">
+          <CountryDetails
+            country={selectedCountry}
+            onBorderClick={handleBorderClick}
+          />
+        </div>
+      )}
+    </div>
+
+    {}
+    <div className="lg:w-1/2 xl:w-3/5">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setSortAscending((prev) => !prev)}
+          className="px-4 py-2 bg-indigo-200 text-indigo-800 rounded hover:bg-indigo-300 transition"
+        >
+          Sort by Area {sortAscending ? '↑ Asc' : '↓ Desc'}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {sortedCountries.map((country) => (
+          <button
+            key={country.cca3}
+            onClick={() => handleCountrySelect(country)}
+            className={`p-4 rounded-lg shadow-md transition-all ${
+              selectedCountry?.cca3 === country.cca3
+                ? 'bg-indigo-100 border-2 border-indigo-500'
+                : 'bg-white hover:shadow-lg'
+            }`}
+          >
+            <img
+              src={country.flags.png}
+              alt={`Flag of ${country.name.common}`}
+              className="w-full h-32 object-cover rounded-md mb-4"
+            />
+            <h3 className="font-semibold text-gray-800">{country.name.common}</h3>
+            <p className="text-sm text-gray-600">{country.region}</p>
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+) : (
+  <div className="text-center text-gray-600">
+    No countries found matching your criteria
+  </div>
+)}
+
       </main>
 
       <Footer />
